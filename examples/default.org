@@ -1,0 +1,117 @@
+#+TITLE: ox-mom Test Document
+#+AUTHOR: Lee Hinman
+
+* Load ox-mom
+#+begin_src emacs-lisp
+  (load "~/src/ox-mom/ox-mom.el")
+#+end_src
+
+* Unordered Lists
+- item
+- item
+- item
+* Ordered Lists
+1. item
+2. item
+3. item
+* Description List
+- First :: First item
+- Second :: Second item
+- Third :: Third item
+* Check List
+- [ ] Not Done
+- [X] Done
+* Mixed List
+1. First Numbered
+   - Bullet one
+   - Bullet two
+   - Bullet three
+2. Second Numbered
+   - Bullet 2.1
+   - Bullet 2.2
+* Special Symbols
+Pro tip: Given a circle \Gamma of diameter d, the length of its
+circumference is \pi{}d.
+* Subscripts and Superscripts
+This has a superscript 10^8.
+This has a subscript 10_8.
+* Emphasis and Monospace
+You can make words *bold*, /italic/, _underlined_, =verbatim=, ~code~, and, if you must, +strike-through+.
+* Paragraphs
+#+BEGIN_VERSE
+  a mock poem
+  to test
+  verbatim block
+
+     ---Anonymous
+#+END_VERSE
+#+BEGIN_QUOTE
+A mock quote
+   ---Anonymous
+#+END_QUOTE
+#+BEGIN_CENTER
+Text to Center
+#+END_CENTER
+* Heading 1
+** Heading 2
+*** Heading 3
+**** Heading 4
+***** Heading 5
+****** Heading 6
+***** Heading 5 again
+**** Heading 4 again
+*** Heading 3 again
+** Heading 2 again
+* Footnotes
+
+Here is a footnote[fn:: This is the first footnote.] in a sentence.
+And another[fn:: This footnote has *bold* text inside it.] one.
+
+* Links and Images
+
+A plain URL: https://www.gnu.org/software/groff/
+
+A described link: [[https://orgmode.org][Org Mode website]]
+
+* Table
+
+| Language | Year | Paradigm   |
+|----------+------+------------|
+| Lisp     | 1958 | Functional |
+| C        | 1972 | Imperative |
+| Haskell  | 1990 | Functional |
+
+* Code and Examples
+
+#+BEGIN_EXAMPLE
+$ pdfmom document.mom > document.pdf
+  indented example line
+#+END_EXAMPLE
+
+#+BEGIN_SRC elisp
+(defun hello ()
+  (message "Hello from ox-mom!"))
+#+END_SRC
+
+: This is a fixed-width line.
+: And another one.
+
+* TODO Keywords and Tags                                      :work:
+
+** TODO [#A] Urgent task                                      :urgent:
+
+Some body text here.
+
+** DONE Completed task
+
+
+* Lets try embedding PIC
+
+#+begin_export mom
+  .PS
+  down;
+  box "Emacs"
+  arrow
+  box "Org Mode"
+  .PE
+#+end_export

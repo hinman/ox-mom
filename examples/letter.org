@@ -1,0 +1,29 @@
+#+AUTHOR: Lee Hinman
+#+DATE: May 27, 2026
+#+MOM_DOCTYPE: LETTER
+#+MOM_LETTER_TO: Jane Smith
+#+MOM_LETTER_TO: 456 Oak Avenue
+#+MOM_LETTER_TO: Springfield, IL 62701
+#+MOM_LETTER_FROM: Lee Hinman
+#+MOM_LETTER_FROM: 1234 Example Lane
+#+MOM_LETTER_FROM: Nowhere, CT
+#+MOM_LETTER_GREETING: Dear Ms. Smith,
+#+MOM_LETTER_CLOSING: Sincerely,
+
+First paragraph of the letter body.  It should be long enough that it
+causes a line wrap, because otherwise how will we see the hanging
+indent.  Example text is hard to come up with.
+
+And this is the second paragraph.  Why do I want a second paragraph.
+I don't know, it just seems like a good idea.  I'm also curious to see
+if code examples will work in a letter.
+
+#+begin_src shell
+  cd ~
+  ls -al
+#+end_src
+
+And now the last paragraph.  Because again, we want to be long enough
+that it causes a line wrap.  Three, really short sentences that are
+each a paragraph looks weird.
+
