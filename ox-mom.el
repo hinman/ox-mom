@@ -77,7 +77,7 @@
    (table-row . org-mom-not-implemnted)
    (target . org-mom-not-implemnted)
    (template . org-mom-template)
-   (timestamp . org-mom-not-implemnted)
+   (timestamp . org-mom-timestamp)
    (underline . org-mom-not-implemnted)
    (verbatim . org-mom-not-implemnted)
    (verse-block . org-mom-not-implemnted))
@@ -89,7 +89,25 @@
 
 
 ;;; User Configurable Variables
+(defgroup org-export-mom nil
+  "Options for exporting Org mode files to MOM."
+  :tag "Org Export MOM"
+  :group 'org-export)
 
+(defcustom org-mom-active-timestamp-format "%s"
+  "A printf format string to be applied to active timestamps."
+  :group 'org-export-mom
+  :type 'string)
+
+(defcustom org-mom-inactive-timestamp-format "%s"
+  "A printf format string to be applied to inactive timestamps."
+  :group 'org-export-mom
+  :type 'string)
+
+(defcustom org-mom-diary-timestamp-format "%s"
+  "A printf format string to be applied to diary timestamps."
+  :group 'org-export-mom
+  :type 'string)
 
 ;;; Preamble
 
@@ -105,8 +123,19 @@
   "Return complete document string after Groff conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (format "\\# -*- mode:nroff -*-\n.TITLE Not Yet\n.PRINTSTYLE TYPESET\n.START\n%s" contents))
-
+  (let ((title (and (plist-get info :with-title)
+		    (let ((temp-title (plist-get info :title)))
+		      (and temp-title (org-export-data temp-title info)))))
+	(author (and (plist-get info :with-author)
+		     (let ((auth (plist-get info :author)))
+		       (and auth (org-export-data auth info))))))
+    (concat
+     (format "\\# -*-mode:nroff -*-\n")
+     (when title
+       (format ".TITLE \"%s\"\n" title))
+     (when author
+       (format ".AUTHOR \"%s\"\n" author))
+     (format ".PRINTSTYLE TYPESET\n.START\n%s" contents))))
 
 
 ;;; Transcode Functions
@@ -170,6 +199,20 @@ holding contextual information."
          (retain-labels (org-element-property :retain-labels src-block)))
   (format ".QUOTE\n.CODE\n%s.QUOTE OFF\n"
 	  (org-export-format-code-default src-block info))))
+
+;;; timestamp
+(defun org-mom-timestamp (timestamp contents info)
+  "Transcode a TIMESTAMP object from Org to Mom Groff.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (let ((value (org-mom-plain-text
+		(org-timestamp-translate timestamp) info)))
+    (case (org-element-property :type timestamp)
+      ((active active-range)
+       (format org-mom-active-timestamp-format value))
+      ((inactive inactive-range)
+       (format org-mom-inactive-timestamp-format value))
+      (t (format org-mom-diary-timestamp-format value)))))
 
 ;;; Interactive functions
 
