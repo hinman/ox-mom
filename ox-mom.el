@@ -36,7 +36,7 @@
 (org-export-define-backend
  'mom
  '((bold . org-mom-bold)
-   (center-block . org-mom-not-implemented)
+   (center-block . org-mom-center-block)
    (clock . org-mom-not-implemented)
    (code . org-mom-not-implemented)
    (drawer . org-mom-not-implemented)
@@ -114,7 +114,14 @@
 
 
 ;;; Internal Functions
-
+(defun org-groff--wrap-label (element output)
+  "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
+This function shouldn't be used for floats.  See
+`org-groff--caption/label-string'."
+  (let ((label (org-element-property :name element)))
+    (if (or (not output) (not label) (string= output "") (string= label ""))
+        output
+      (concat (format "%s\n.br\n" label) output))))
 
 
 ;;; Template
@@ -152,6 +159,15 @@ holding export options."
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
   (format "\\*[BOLDER]%s\\*[BOLDERX]" contents))
+
+;;; Center block
+(defun org-mom-center-block (center-block contents info)
+  "Transcode a CENTER-BLOCK element from Org to MOM.
+CONTENTS holds the contents of the center block.  INFO is a plist
+holding contextual information."
+  (org-groff--wrap-label
+   center-block
+   (format ".CENTER_BLOCK\n%s\n.CENTER_BLOCK OFF" contents)))
 
 (defun org-mom-entity (entity contents info)
   "Transcode an ENTITY object from Org to Mom Groff.
