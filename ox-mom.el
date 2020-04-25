@@ -37,8 +37,13 @@
  'mom
  '((bold . org-mom-bold)
    (center-block . org-mom-center-block)
+<<<<<<< HEAD
    (clock . org-mom-clock)
    (code . org-mom-code)
+=======
+   (clock . org-mom-not-implemented)
+   (code . org-mom-not-implemented)
+>>>>>>> 01c2a6fc2ad3de335e0bc676bb8e3211bdfda0e9
    (drawer . org-mom-not-implemented)
    (dynamic-block . org-mom-not-implemented)
    (entity . org-mom-entity)
