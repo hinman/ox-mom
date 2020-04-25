@@ -36,9 +36,9 @@
 (org-export-define-backend
  'mom
  '((bold . org-mom-bold)
-   (center-block . org-mom-not-implemented)
-   (clock . org-mom-not-implemented)
-   (code . org-mom-not-implemented)
+   (center-block . org-mom-center-block)
+   (clock . org-mom-clock)
+   (code . org-mom-code)
    (drawer . org-mom-not-implemented)
    (dynamic-block . org-mom-not-implemented)
    (entity . org-mom-entity)
@@ -94,17 +94,17 @@
   :tag "Org Export MOM"
   :group 'org-export)
 
-(defcustom org-mom-active-timestamp-format "%s"
+(defcustom org-mom-active-timestamp-format "\\f[I]%s\\f[P]"
   "A printf format string to be applied to active timestamps."
   :group 'org-export-mom
   :type 'string)
 
-(defcustom org-mom-inactive-timestamp-format "%s"
+(defcustom org-mom-inactive-timestamp-format "\\f[I]%s\\f[P]"
   "A printf format string to be applied to inactive timestamps."
   :group 'org-export-mom
   :type 'string)
 
-(defcustom org-mom-diary-timestamp-format "%s"
+(defcustom org-mom-diary-timestamp-format "\\f[I]%s\\f[P]"
   "A printf format string to be applied to diary timestamps."
   :group 'org-export-mom
   :type 'string)
@@ -114,7 +114,14 @@
 
 
 ;;; Internal Functions
-
+(defun org-groff--wrap-label (element output)
+  "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
+This function shouldn't be used for floats.  See
+`org-groff--caption/label-string'."
+  (let ((label (org-element-property :name element)))
+    (if (or (not output) (not label) (string= output "") (string= label ""))
+        output
+      (concat (format "%s\n.br\n" label) output))))
 
 
 ;;; Template
@@ -153,6 +160,35 @@ CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
   (format "\\*[BOLDER]%s\\*[BOLDERX]" contents))
 
+;;; Center block
+(defun org-mom-center-block (center-block contents info)
+  "Transcode a CENTER-BLOCK element from Org to MOM.
+CONTENTS holds the contents of the center block.  INFO is a plist
+holding contextual information."
+  (org-groff--wrap-label
+   center-block
+   (format ".CENTER_BLOCK\n%s\n.CENTER_BLOCK OFF" contents)))
+
+;;; Clock
+(defun org-mom-clock (clock contents info)
+  "Transcode a CLOCK element from Org to Groff.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (concat
+   (format "\\f[B]%s\\f[P] " org-clock-string)
+   (format org-mom-inactive-timestamp-format
+           (concat (org-timestamp-translate (org-element-property :value clock))
+                   (let ((time (org-element-property :duration clock)))
+                     (and time (format " (%s)" time)))))))
+;;; Code
+  "Transcode a CODE object from Org to Groff.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+(defun org-mom-code (code contents info)
+  (format ".CODE\n%s\n.CODE OFF\n"
+	  (org-element-property :value code)))
+
+;;; Entity
 (defun org-mom-entity (entity contents info)
   "Transcode an ENTITY object from Org to Mom Groff.
 CONTENTS are the definition itself.  INFO is a plist holding
