@@ -37,13 +37,8 @@
  'mom
  '((bold . org-mom-bold)
    (center-block . org-mom-center-block)
-<<<<<<< HEAD
    (clock . org-mom-clock)
    (code . org-mom-code)
-=======
-   (clock . org-mom-not-implemented)
-   (code . org-mom-not-implemented)
->>>>>>> 01c2a6fc2ad3de335e0bc676bb8e3211bdfda0e9
    (drawer . org-mom-not-implemented)
    (dynamic-block . org-mom-not-implemented)
    (entity . org-mom-entity)
@@ -58,17 +53,17 @@
    (inline-src-block . org-mom-inline-src-block)
    (inlinetask . org-mom-not-implemnted)
    (italic . org-mom-not-implemnted)
-   (item . org-mom-not-implemnted)
+   (item . org-mom-item)
    (keyword . org-mom-not-implemnted)
    (line-break . org-mom-not-implemnted)
    (link . org-mom-not-implemnted)
    (node-property . org-mom-not-implemnted)
    (paragraph . org-mom-paragraph)
-   (plain-list . org-mom-not-implemnted)
+   (plain-list . org-mom-plain-list)
    (plain-text . org-mom-plain-text)
    (planning . org-mom-not-implemnted)
    (property-drawer . org-mom-not-implemnted)
-   (quote-block . org-mom-not-implemnted)
+   (quote-block . org-mom-quote-block)
    (radio-target . org-mom-not-implemnted)
    (section . org-mom-section)
    (special-block . org-mom-not-implemnted)
@@ -85,7 +80,7 @@
    (timestamp . org-mom-timestamp)
    (underline . org-mom-not-implemnted)
    (verbatim . org-mom-not-implemnted)
-   (verse-block . org-mom-not-implemnted))
+   (verse-block . org-mom-verse-block))
 
  :menu-entry
  '(?m "Export to MOM"
@@ -119,10 +114,10 @@
 
 
 ;;; Internal Functions
-(defun org-groff--wrap-label (element output)
+(defun org-mom--wrap-label (element output)
   "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
 This function shouldn't be used for floats.  See
-`org-groff--caption/label-string'."
+`org-mom--caption/label-string'."
   (let ((label (org-element-property :name element)))
     (if (or (not output) (not label) (string= output "") (string= label ""))
         output
@@ -132,7 +127,7 @@ This function shouldn't be used for floats.  See
 ;;; Template
 
 (defun org-mom-template (contents info)
-  "Return complete document string after Groff conversion.
+  "Return complete document string after MOM conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((title (and (plist-get info :with-title)
@@ -170,13 +165,13 @@ contextual information."
   "Transcode a CENTER-BLOCK element from Org to MOM.
 CONTENTS holds the contents of the center block.  INFO is a plist
 holding contextual information."
-  (org-groff--wrap-label
+  (org-mom--wrap-label
    center-block
    (format ".CENTER_BLOCK\n%s\n.CENTER_BLOCK OFF" contents)))
 
 ;;; Clock
 (defun org-mom-clock (clock contents info)
-  "Transcode a CLOCK element from Org to Groff.
+  "Transcode a CLOCK element from Org to MOM.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (concat
@@ -186,7 +181,7 @@ information."
                    (let ((time (org-element-property :duration clock)))
                      (and time (format " (%s)" time)))))))
 ;;; Code
-  "Transcode a CODE object from Org to Groff.
+  "Transcode a CODE object from Org to MOM.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
 (defun org-mom-code (code contents info)
@@ -195,7 +190,7 @@ channel."
 
 ;;; Entity
 (defun org-mom-entity (entity contents info)
-  "Transcode an ENTITY object from Org to Mom Groff.
+  "Transcode an ENTITY object from Org to Mom.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
   (org-element-property :utf-8 entity))
@@ -210,11 +205,35 @@ contextual information."
 (defun org-mom-inline-src-block (inline-src-block contents info)
   (format "%s" contents))
 
+;;; item
+(defun org-mom-item (item contents info)
+  "Transcode an ITEM element from Org to MOM.
+CONTENTS holds the contents of the item.  INFO is a plist holding
+contextual information."
+  (format ".ITEM %s\n" (org-trim contents)))
+
 ;;; Not-implemented
 (defun org-mom-not-implemented (text contents info)
   (format "text %s\n" text)
   (format "contents %s\n" contents)
   (format "info %s\n" info))
+
+;;; Plain List
+(defun org-mom-plain-list (plain-list contents info)
+  "Transcode a PLAIN-LIST element from Org to Mom.
+CONTENTS is the contents of the list.  INFO is a plist holding
+contextual information."
+  (let* ((type (org-element-property :type plain-list))
+         (attr (mapconcat #'identity
+                          (org-element-property :attr_mom plain-list)
+                          " "))
+         (mom-type (cond
+		    ((eq type 'ordered) ".LIST DIGIT")
+                      ((eq type 'unordered) ".LIST BULLET")
+                      ((eq type 'descriptive) ".LIST ALPHA"))))
+    (org-mom--wrap-label
+     plain-list
+     (format "%s\n%s\n.LIST OFF\n" mom-type contents))))
 
 ;;; Plain Text
 (defun org-mom-plain-text (text info)
@@ -224,13 +243,20 @@ contextual information."
 (defun org-mom-paragraph (paragraph contents info)
   (format ".PP\n%s" contents))
 
+;;; Quote
+(defun org-mom-quote-block (quote-block contents info)
+  "Transcode a QUOTE-BLOCK element from Org to MOM.
+CONTENTS is verse block contents. INFO is a plist holding
+contextual information."
+  (format ".QUOTE\n%s\n.QUOTE OFF" contents))
+
 ;;; Section
 (defun org-mom-section (section contents info)
   (format "%s" contents))
 
 ;;; src-block
 (defun org-mom-src-block (src-block contents info)
-  "Transcode a SRC-BLOCK element from Org to Mom Groff
+  "Transcode a SRC-BLOCK element from Org to MOM
 Contents holds the contenst of the item.  INFO is a plist
 holding contextual information."
   (let* ((lang (org-element-property :language src-block))
@@ -243,7 +269,7 @@ holding contextual information."
 
 ;;; timestamp
 (defun org-mom-timestamp (timestamp contents info)
-  "Transcode a TIMESTAMP object from Org to Mom Groff.
+  "Transcode a TIMESTAMP object from Org to Mom.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (let ((value (org-mom-plain-text
@@ -254,12 +280,19 @@ information."
       ((inactive inactive-range)
        (format org-mom-inactive-timestamp-format value))
       (t (format org-mom-diary-timestamp-format value)))))
+;;; Verse
+(defun org-mom-verse-block (verse-block contents info)
+  "Transcode a VERSE-BLOCK element from Org to MOM.
+CONTENTS is verse block contents. INFO is a plist holding
+contextual information."
+  (format ".QUOTE\n%s\n.QUOTE OFF" contents))
+
 
 ;;; Interactive functions
 
 (defun org-mom-export-to-mom
   (&optional async subtreep visible-only body-only ext-plist)
-  "Export current buffer to a Groff file.
+  "Export current buffer to a Mom file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
@@ -288,4 +321,4 @@ Return output file's name."
       async subtreep visible-only body-only ext-plist)))
 
 (provide 'ox-mom)
-;;; ox-groff.el ends here
+;;; ox-mom.el ends here
