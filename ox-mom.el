@@ -84,7 +84,8 @@
 
  :menu-entry
  '(?m "Export to MOM"
-      ((?m "As MOM file" org-mom-export-to-mom))))
+      ((?b "As MOM buffer" org-mom-export-as-mom)
+       (?f "As MOM file" org-mom-export-to-mom))))
 
 
 
@@ -290,9 +291,45 @@ contextual information."
 
 ;;; Interactive functions
 
+;;;###autoload
+(defun org-mom-export-as-mom
+  (&optional async subtreep visible-only body-only ext-plist)
+  "Export current buffer as a MOM GROFF buffer.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+When optional argument BODY-ONLY is non-nil, only write code
+between \"\\begin{document}\" and \"\\end{document}\".
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+Export is done in a buffer named \"*Org MOM Export*\", which
+will be displayed when `org-export-show-temporary-export-buffer'
+is non-nil."
+  (interactive)
+  (org-export-to-buffer 'mom "*Org MOM Export*"
+    async subtreep visible-only body-only ext-plist (lambda () (nroff-mode))))
+
+;;;###autoload
 (defun org-mom-export-to-mom
   (&optional async subtreep visible-only body-only ext-plist)
-  "Export current buffer to a Mom file.
+  "Export current buffer to a MOM file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
@@ -310,11 +347,12 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
+When optional argument BODY-ONLY is non-nil, only write code
+between \"\\begin{document}\" and \"\\end{document}\".
+
 EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
-file-local settings.
-
-Return output file's name."
+file-local settings."
   (interactive)
   (let ((outfile (org-export-output-file-name ".mom" subtreep)))
     (org-export-to-file 'mom outfile
