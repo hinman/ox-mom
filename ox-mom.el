@@ -85,7 +85,12 @@
  :menu-entry
  '(?m "Export to MOM"
       ((?b "As MOM buffer" org-mom-export-as-mom)
-       (?f "As MOM file" org-mom-export-to-mom))))
+       (?f "As MOM file" org-mom-export-to-mom)
+       (?p "As PDF file" org-mom-export-to-pdf)
+       (?o "As PDF file and open"
+	   (lambda (a s v b)
+	     (if a (org-mom-export-to-pdf t s v b)
+	       (org-open-file (org-mom-export-to-pdf nil s v b))))))))
 
 
 
@@ -109,6 +114,33 @@
   "A printf format string to be applied to diary timestamps."
   :group 'org-export-mom
   :type 'string)
+
+(defcustom org-mom-pdf-process
+  '("pdfmom %f > %b.pdf"
+    "pdfmom %f > %b.pdf"
+    "pdfmom %f > %b.pdf")
+  "Commands to process a Groff file to a PDF file.
+%f in the command will be replaced by the
+full file name, %b by the file base name \(i.e. without
+extension) and %o by the base directory of the file."
+  :group 'org-export-pdf
+  :type '(choice
+	  (repeat :tag "Shell command sequence"
+		  (string :tag "Shell command"))
+	  (const :tag "2 runs of pdfmom"
+                 ("pdfmom %f > %b.pdf"
+                  "pdfmom %f > %b.pdf"))
+          (const :tag "3 runs of pdfgroff"
+                 ("pdfmom %f > %b.pdf"
+                  "pdfmom %f > %b.pdf"
+                  "pdfmom %f > %b.pdf"))
+	  (function)))
+
+(defcustom org-mom-logfiles-extensions
+  '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb")
+  "The list of file extensions to consider as MOM logfiles."
+  :group 'org-export-mom
+  :type '(repeat (string :tag "Extension")))
 
 ;;; Preamble
 
@@ -357,6 +389,49 @@ file-local settings."
   (let ((outfile (org-export-output-file-name ".mom" subtreep)))
     (org-export-to-file 'mom outfile
       async subtreep visible-only body-only ext-plist)))
+
+(defun org-mom-export-to-pdf
+  (&optional async subtreep visible-only body-only ext-plist)
+  "Export current buffer to MOM then process through to PDF.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+Return PDF file's name."
+  (interactive)
+  (let ((outfile (org-export-output-file-name ".mom" subtreep)))
+    (org-export-to-file 'mom outfile
+      async subtreep visible-only body-only ext-plist
+      (lambda (file) (org-mom-compile file)))))
+
+(defun org-mom-compile (file)
+  "Compile a MOM file.
+
+FILE is the name of the file being compiled.  Processing is done
+through the command specified in `org-mom-pdf-process'.
+
+Return PDF file name or an error if it couldn't be produced."
+  (message "Processing MOM file %s..." file)
+  (let ((output (org-compile-file file org-mom-pdf-process "pdf")))
+    (message "Process completed.")
+    output))
 
 (provide 'ox-mom)
 ;;; ox-mom.el ends here
