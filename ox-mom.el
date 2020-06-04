@@ -52,7 +52,7 @@
    (horizontal-rule . org-mom-not-implemnted)
    (inline-src-block . org-mom-inline-src-block)
    (inlinetask . org-mom-not-implemnted)
-   (italic . org-mom-not-implemnted)
+   (italic . org-mom-italic)
    (item . org-mom-item)
    (keyword . org-mom-not-implemnted)
    (line-break . org-mom-not-implemnted)
@@ -78,8 +78,8 @@
    (target . org-mom-not-implemnted)
    (template . org-mom-template)
    (timestamp . org-mom-timestamp)
-   (underline . org-mom-not-implemnted)
-   (verbatim . org-mom-not-implemnted)
+   (underline . org-mom-underline)
+   (verbatim . org-mom-verbatim)
    (verse-block . org-mom-verse-block))
 
  :menu-entry
@@ -191,7 +191,7 @@ holding export options."
   "Transcode BOLD from Org to MOM.
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
-  (format "\\*[BOLDER]%s\\*[BOLDERX]" contents))
+  (format "\\fB%s\\fP" contents))
 
 ;;; Center block
 (defun org-mom-center-block (center-block contents info)
@@ -238,6 +238,13 @@ contextual information."
 (defun org-mom-inline-src-block (inline-src-block contents info)
   (format "%s" contents))
 
+;;; italic
+(defun org-mom-italic (italic contents info)
+  "Transcode italic from Org to MOM.
+CONTENTS is the text with bold markup.  INFO is a plist holding
+contextual information."
+  (format "\\fI%s\\fP" contents))
+
 ;;; item
 (defun org-mom-item (item contents info)
   "Transcode an ITEM element from Org to MOM.
@@ -281,7 +288,7 @@ contextual information."
   "Transcode a QUOTE-BLOCK element from Org to MOM.
 CONTENTS is verse block contents. INFO is a plist holding
 contextual information."
-  (format ".QUOTE\n%s\n.QUOTE OFF" contents))
+  (format ".BLOCKQUOTE\n%s\n.BLOCKQUOTE OFF" contents))
 
 ;;; Section
 (defun org-mom-section (section contents info)
@@ -313,6 +320,19 @@ information."
       ((inactive inactive-range)
        (format org-mom-inactive-timestamp-format value))
       (t (format org-mom-diary-timestamp-format value)))))
+
+;;; Underline
+(defun org-mom-underline (underline contents info)
+  (format "\\*[UL]%s\\*[ULX]" contents))
+
+;;; Verbatim
+(defun org-mom-verbatim (verbatim contents info)
+  "Transcode a verbatim element from Org to MOM.
+CONTENTS is verbatim contents. INFO is a plist holding
+contextual information."
+  (format ".QUOTE\n%s\n.QUOTE OFF"
+	  (org-element-property :value verbatim)))
+  
 ;;; Verse
 (defun org-mom-verse-block (verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to MOM.
