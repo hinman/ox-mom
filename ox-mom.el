@@ -69,9 +69,9 @@
    (special-block . org-mom-not-implemnted)
    (src-block . org-mom-src-block)
    (statistics-cookie . org-mom-not-implemnted)
-   (strike-through . org-mom-not-implemnted)
-   (subscript . org-mom-not-implemnted)
-   (superscript . org-mom-not-implemnted)
+   (strike-through . org-mom-strike-through)
+   (subscript . org-mom-subscript)
+   (superscript . org-mom-superscript)
    (table . org-mom-not-implemnted)
    (table-cell . org-mom-not-implemnted)
    (table-row . org-mom-not-implemnted)
@@ -191,7 +191,7 @@ holding export options."
   "Transcode BOLD from Org to MOM.
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
-  (format "\\fB%s\\fP" contents))
+  (format "\\f[B]%s\\f[P]" contents))
 
 ;;; Center block
 (defun org-mom-center-block (center-block contents info)
@@ -218,7 +218,7 @@ information."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
 (defun org-mom-code (code contents info)
-  (format ".CODE\n%s\n.CODE OFF\n"
+  (format "\n.CODE\n%s\n.CODE OFF\n"
 	  (org-element-property :value code)))
 
 ;;; Entity
@@ -232,7 +232,9 @@ contextual information."
 (defun org-mom-headline (headline contents info)
   (let* ((level (org-export-get-relative-level headline info))
 	 (title (org-export-data (org-element-property :title headline) info)))
-    (format ".HEADING %s \"%s\"\n%s" level title contents)))
+    (if contents 
+	(format ".HEADING %s \"%s\"\n%s" level title contents)
+      (format ".HEADING %s \"%s\"\n" level title))))
 
 ;;; inline-src-block
 (defun org-mom-inline-src-block (inline-src-block contents info)
@@ -243,14 +245,14 @@ contextual information."
   "Transcode italic from Org to MOM.
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
-  (format "\\fI%s\\fP" contents))
+  (format "\\f[I]%s\\f[P]" contents))
 
 ;;; item
 (defun org-mom-item (item contents info)
   "Transcode an ITEM element from Org to MOM.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (format ".ITEM %s\n" (org-trim contents)))
+  (format ".ITEM\n%s\n" (org-trim contents)))
 
 ;;; Not-implemented
 (defun org-mom-not-implemented (text contents info)
@@ -307,6 +309,18 @@ holding contextual information."
   (format ".QUOTE\n.CODE\n%s.QUOTE OFF\n"
 	  (org-export-format-code-default src-block info))))
 
+;;; strike-through
+(defun org-mom-strike-through (strike-through contents info)
+  (format "\n.UNDERSCORE -0.3m \"%s\"\n" contents))
+
+;;; superscript
+(defun org-mom-subscript (subscript contents info)
+  (format "\n.SUPERSCRIPT_RAISE_AMOUNT -0.3m\n\\*[SUP]%s\\*[SUPX]\n.SUPERSCRIPT_RAISE_AMOUNT 0.3m\n" contents))
+
+;;; superscript
+(defun org-mom-superscript (superscript contents info)
+  (format "\\*[SUP]%s\\*[SUPX]" contents))
+
 ;;; timestamp
 (defun org-mom-timestamp (timestamp contents info)
   "Transcode a TIMESTAMP object from Org to Mom.
@@ -323,14 +337,14 @@ information."
 
 ;;; Underline
 (defun org-mom-underline (underline contents info)
-  (format "\\*[UL]%s\\*[ULX]" contents))
+  (format "\n.UNDERSCORE \"%s\"\n" contents))
 
 ;;; Verbatim
 (defun org-mom-verbatim (verbatim contents info)
   "Transcode a verbatim element from Org to MOM.
 CONTENTS is verbatim contents. INFO is a plist holding
 contextual information."
-  (format ".QUOTE\n%s\n.QUOTE OFF"
+  (format "\n.CODE\n%s\n.CODE OFF\n"
 	  (org-element-property :value verbatim)))
   
 ;;; Verse

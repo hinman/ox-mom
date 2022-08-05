@@ -1,0 +1,49 @@
+* Load ox-mom
+#+begin_src emacs-lisp
+  (load "~/src/ox-mom/ox-mom.el")
+#+end_src
+* Unorderd Lists
+- item
+- item
+- item
+* Ordered Lists
+1. item
+2. item
+3. item
+* Description List
+- First :: First item
+- Second :: Second item
+- Third :: Third item
+* Special Symbols
+Pro tip: Given a circle \Gamma of diameter d, the length of its
+circumference is \pi{}d.
+* Subscripts and Superscripts
+This has a superscript 10^8.
+This has a subscript 10_8.
+* Emphasis and Monospace
+You can make words *bold*, /italic/, _underlined_, =verbatim=, ~code~, and, if you must, +strike-through+.
+* Paragraphs
+#+BEGIN_VERSE
+  a mock poem
+  to test
+  verbatim block
+
+     ---Anonymous
+#+END_VERSE
+#+BEGIN_QUOTE
+A mock quote
+   ---Anonymous
+#+END_QUOTE
+#+BEGIN_CENTER
+Text to Center
+#+END_CENTER
+* Heading 1
+** Heading 2
+*** Heading 3
+**** Heading 4
+***** Heading 5
+****** Heading 6
+***** Heading 5 again
+**** Heading 4 again
+*** Heading 3 again
+** Heading 2 again
