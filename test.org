@@ -1,8 +1,12 @@
+#+TITLE: ox-mom Test Document
+#+AUTHOR: Lee Hinman
+
 * Load ox-mom
 #+begin_src emacs-lisp
   (load "~/src/ox-mom/ox-mom.el")
 #+end_src
-* Unorderd Lists
+
+* Unordered Lists
 - item
 - item
 - item
@@ -14,6 +18,9 @@
 - First :: First item
 - Second :: Second item
 - Third :: Third item
+* Check List
+- [ ] Not Done
+- [X] Done
 * Special Symbols
 Pro tip: Given a circle \Gamma of diameter d, the length of its
 circumference is \pi{}d.
@@ -47,3 +54,44 @@ Text to Center
 **** Heading 4 again
 *** Heading 3 again
 ** Heading 2 again
+* Footnotes
+
+Here is a footnote[fn:: This is the first footnote.] in a sentence.
+And another[fn:: This footnote has *bold* text inside it.] one.
+
+* Links and Images
+
+A plain URL: https://www.gnu.org/software/groff/
+
+A described link: [[https://orgmode.org][Org Mode website]]
+
+* Table
+
+| Language | Year | Paradigm   |
+|----------+------+------------|
+| Lisp     | 1958 | Functional |
+| C        | 1972 | Imperative |
+| Haskell  | 1990 | Functional |
+
+* Code and Examples
+
+#+BEGIN_EXAMPLE
+$ pdfmom document.mom > document.pdf
+  indented example line
+#+END_EXAMPLE
+
+#+BEGIN_SRC elisp
+(defun hello ()
+  (message "Hello from ox-mom!"))
+#+END_SRC
+
+: This is a fixed-width line.
+: And another one.
+
+* TODO Keywords and Tags                                      :work:
+
+** TODO [#A] Urgent task                                      :urgent:
+
+Some body text here.
+
+** DONE Completed task
