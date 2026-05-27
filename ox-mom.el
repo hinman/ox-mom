@@ -90,7 +90,16 @@
        (?o "As PDF file and open"
 	   (lambda (a s v b)
 	     (if a (org-mom-export-to-pdf t s v b)
-	       (org-open-file (org-mom-export-to-pdf nil s v b))))))))
+	       (org-open-file (org-mom-export-to-pdf nil s v b)))))))
+
+ :options-alist
+ '((:mom-doctype  "MOM_DOCTYPE"  nil nil nil)
+   (:mom-to       "MOM_TO"       nil nil newline)
+   (:mom-from     "MOM_FROM"     nil nil newline)
+   (:mom-cc       "MOM_CC"       nil nil newline)
+   (:mom-subject  "MOM_SUBJECT"  nil nil nil)
+   (:mom-greeting "MOM_GREETING" nil nil nil)
+   (:mom-closing  "MOM_CLOSING"  nil nil nil)))
 
 
 
@@ -219,24 +228,43 @@ This function shouldn't be used for floats.  See
   "Return complete document string after MOM conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let ((title (and (plist-get info :with-title)
-		    (let ((temp-title (plist-get info :title)))
-		      (and temp-title (org-export-data temp-title info)))))
-	(author (and (plist-get info :with-author)
-		     (let ((auth (plist-get info :author)))
-		       (and auth (org-export-data auth info))))))
+  (let* ((title (and (plist-get info :with-title)
+		     (let ((temp-title (plist-get info :title)))
+		       (and temp-title (org-export-data temp-title info)))))
+	 (author (and (plist-get info :with-author)
+		      (let ((auth (plist-get info :author)))
+			(and auth (org-export-data auth info)))))
+	 (doctype     (or (plist-get info :mom-doctype) org-mom-doctype))
+	 (letter-p    (string= (upcase doctype) "LETTER"))
+	 (mom-date     (and letter-p
+			    (let ((d (plist-get info :date)))
+			      (and d (org-export-data d info)))))
+	 (mom-to       (and letter-p (plist-get info :mom-to)))
+	 (mom-from     (and letter-p (plist-get info :mom-from)))
+	 (mom-cc       (and letter-p (plist-get info :mom-cc)))
+	 (mom-subject  (and letter-p (plist-get info :mom-subject)))
+	 (mom-greeting (and letter-p (plist-get info :mom-greeting)))
+	 (mom-closing  (and letter-p (plist-get info :mom-closing))))
     (concat
      (format "\\# -*-mode:nroff -*-\n")
      (format ".PAPER %s\n" org-mom-paper)
      (format ".FAMILY %s\n" org-mom-font-family)
      (format ".PT_SIZE %s\n" org-mom-pt-size)
-     (format ".DOCTYPE %s\n" org-mom-doctype)
+     (format ".DOCTYPE %s\n" doctype)
      (format ".PRINTSTYLE TYPESET\n")
      (when title
        (format ".TITLE \"%s\"\n" title))
      (when author
        (format ".AUTHOR \"%s\"\n" author))
-     (format ".START\n%s" contents))))
+     ".START\n"
+     (when mom-date    (format ".DATE\n%s\n" mom-date))
+     (when mom-to      (format ".TO\n%s\n" mom-to))
+     (when mom-cc      (format ".CC\n%s\n" mom-cc))
+     (when mom-from    (format ".FROM\n%s\n" mom-from))
+     (when mom-subject (format ".SUBJECT \"%s\"\n" mom-subject))
+     (when mom-greeting (format ".GREETING\n%s\n" mom-greeting))
+     contents
+     (when mom-closing (format ".CLOSING\n%s\n" mom-closing)))))
 
 
 ;;; Transcode Functions
