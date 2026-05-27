@@ -94,12 +94,18 @@
 
  :options-alist
  '((:mom-doctype  "MOM_DOCTYPE"  nil nil nil)
-   (:mom-to       "MOM_TO"       nil nil newline)
-   (:mom-from     "MOM_FROM"     nil nil newline)
-   (:mom-cc       "MOM_CC"       nil nil newline)
-   (:mom-subject  "MOM_SUBJECT"  nil nil nil)
-   (:mom-greeting "MOM_GREETING" nil nil nil)
-   (:mom-closing  "MOM_CLOSING"  nil nil nil)))
+   (:mom-preamble "MOM_PREAMBLE" nil nil newline)
+   (:mom-letter-to       "MOM_LETTER_TO"       nil nil newline)
+   (:mom-letter-from     "MOM_LETTER_FROM"     nil nil newline)
+   (:mom-letter-cc       "MOM_LETTER_CC"       nil nil newline)
+   (:mom-letter-subject  "MOM_LETTER_SUBJECT"  nil nil nil)
+   (:mom-letter-greeting "MOM_LETTER_GREETING" nil nil nil)
+   (:mom-letter-closing  "MOM_LETTER_CLOSING"  nil nil nil)
+   (:mom-slides-aspect     "MOM_SLIDES_ASPECT"     nil nil nil)
+   (:mom-slides-header     "MOM_SLIDES_HEADER"     nil nil nil)
+   (:mom-slides-footer     "MOM_SLIDES_FOOTER"     nil nil nil)
+   (:mom-slides-transition "MOM_SLIDES_TRANSITION" nil nil nil)
+   (:mom-slides-pause      "MOM_SLIDES_PAUSE"      nil nil nil)))
 
 
 
@@ -236,35 +242,57 @@ holding export options."
 			(and auth (org-export-data auth info)))))
 	 (doctype     (or (plist-get info :mom-doctype) org-mom-doctype))
 	 (letter-p    (string= (upcase doctype) "LETTER"))
-	 (mom-date     (and letter-p
-			    (let ((d (plist-get info :date)))
-			      (and d (org-export-data d info)))))
-	 (mom-to       (and letter-p (plist-get info :mom-to)))
-	 (mom-from     (and letter-p (plist-get info :mom-from)))
-	 (mom-cc       (and letter-p (plist-get info :mom-cc)))
-	 (mom-subject  (and letter-p (plist-get info :mom-subject)))
-	 (mom-greeting (and letter-p (plist-get info :mom-greeting)))
-	 (mom-closing  (and letter-p (plist-get info :mom-closing))))
+	 (slides-p    (string= (upcase doctype) "SLIDES"))
+	 (letter-date     (and letter-p
+			       (let ((d (plist-get info :date)))
+				 (and d (org-export-data d info)))))
+	 (letter-to       (and letter-p (plist-get info :mom-letter-to)))
+	 (letter-from     (and letter-p (plist-get info :mom-letter-from)))
+	 (letter-cc       (and letter-p (plist-get info :mom-letter-cc)))
+	 (letter-subject  (and letter-p (plist-get info :mom-letter-subject)))
+	 (letter-greeting (and letter-p (plist-get info :mom-letter-greeting)))
+	 (letter-closing  (and letter-p (plist-get info :mom-letter-closing)))
+	 (slides-aspect     (and slides-p (or (plist-get info :mom-slides-aspect) "16:9")))
+	 (slides-header     (and slides-p (plist-get info :mom-slides-header)))
+	 (slides-footer     (and slides-p (plist-get info :mom-slides-footer)))
+	 (slides-transition (and slides-p (plist-get info :mom-slides-transition)))
+	 (slides-pause      (and slides-p (plist-get info :mom-slides-pause))))
     (concat
      (format "\\# -*-mode:nroff -*-\n")
-     (format ".PAPER %s\n" org-mom-paper)
-     (format ".FAMILY %s\n" org-mom-font-family)
-     (format ".PT_SIZE %s\n" org-mom-pt-size)
-     (format ".DOCTYPE %s\n" doctype)
-     (format ".PRINTSTYLE TYPESET\n")
      (when title
        (format ".TITLE \"%s\"\n" title))
      (when author
        (format ".AUTHOR \"%s\"\n" author))
+     (if slides-p
+	 (concat
+	  (when title (format ".PDF_TITLE \"\\*[$TITLE]\"\n"))
+	  (format ".DOCTYPE SLIDES \\\n  ASPECT %s" slides-aspect)
+	  (when slides-header
+	    (format " \\\n  HEADER %s" slides-header))
+	  (when slides-footer
+	    (format " \\\n  FOOTER %s" slides-footer))
+	  (when slides-transition
+	    (format " \\\n  TRANSITION \"%s\"" slides-transition))
+	  (when slides-pause
+	    (format " \\\n  PAUSE \"%s\"" slides-pause))
+	  "\n")
+       (concat
+	(format ".PAPER %s\n" org-mom-paper)
+	(format ".FAMILY %s\n" org-mom-font-family)
+	(format ".PT_SIZE %s\n" org-mom-pt-size)
+	(format ".DOCTYPE %s\n" doctype)
+	(format ".PRINTSTYLE TYPESET\n")))
+     (let ((preamble (plist-get info :mom-preamble)))
+       (when preamble (format "%s\n" preamble)))
      ".START\n"
-     (when mom-date    (format ".DATE\n%s\n" mom-date))
-     (when mom-to      (format ".TO\n%s\n" mom-to))
-     (when mom-cc      (format ".CC\n%s\n" mom-cc))
-     (when mom-from    (format ".FROM\n%s\n" mom-from))
-     (when mom-subject (format ".SUBJECT \"%s\"\n" mom-subject))
-     (when mom-greeting (format ".GREETING\n%s\n" mom-greeting))
+     (when letter-date    (format ".DATE\n%s\n" letter-date))
+     (when letter-to      (format ".TO\n%s\n" letter-to))
+     (when letter-cc      (format ".CC\n%s\n" letter-cc))
+     (when letter-from    (format ".FROM\n%s\n" letter-from))
+     (when letter-subject (format ".SUBJECT \"%s\"\n" letter-subject))
+     (when letter-greeting (format ".GREETING\n%s\n" letter-greeting))
      contents
-     (when mom-closing (format ".CLOSING\n%s\n" mom-closing)))))
+     (when letter-closing (format ".CLOSING\n%s\n" letter-closing)))))
 
 
 ;;; Transcode Functions
@@ -401,7 +429,10 @@ holding contextual information."
 	       (format " \\f[I]%s\\f[P]" (org-make-tag-string tags))))))
 	 (low-level-p (or (> level 6)
 			  (org-export-low-level-p headline info)))
-	 (numberedp   (org-export-numbered-headline-p headline info)))
+	 (numberedp   (org-export-numbered-headline-p headline info))
+	 (slides-p    (string= (upcase (or (plist-get info :mom-doctype)
+					   org-mom-doctype))
+			       "SLIDES")))
     (cond
      ;; Footnote section: skip entirely.
      ((org-element-property :footnote-section-p headline) nil)
@@ -416,7 +447,12 @@ holding contextual information."
 	 ".LIST OFF\n")))
      ;; Standard heading.
      (t
-      (format ".HEADING %s \"%s\"\n%s"
+      (format "%s.HEADING %s \"%s\"\n%s"
+	      (if (and slides-p
+		       (= level 1)
+		       (not (org-export-first-sibling-p headline info)))
+		  ".NEWSLIDE\n"
+		"")
 	      level full-text (or contents ""))))))
 
 ;;; inline-src-block

@@ -1,14 +1,14 @@
 #+AUTHOR: Lee Hinman
 #+DATE: May 27, 2026
 #+MOM_DOCTYPE: LETTER
-#+MOM_TO: Jane Smith
-#+MOM_TO: 456 Oak Avenue
-#+MOM_TO: Springfield, IL 62701
-#+MOM_FROM: Lee Hinman
-#+MOM_FROM: 1234 Example Lane
-#+MOM_FROM: Nowhere, CT
-#+MOM_GREETING: Dear Ms. Smith,
-#+MOM_CLOSING: Sincerely,
+#+MOM_LETTER_TO: Jane Smith
+#+MOM_LETTER_TO: 456 Oak Avenue
+#+MOM_LETTER_TO: Springfield, IL 62701
+#+MOM_LETTER_FROM: Lee Hinman
+#+MOM_LETTER_FROM: 1234 Example Lane
+#+MOM_LETTER_FROM: Nowhere, CT
+#+MOM_LETTER_GREETING: Dear Ms. Smith,
+#+MOM_LETTER_CLOSING: Sincerely,
 
 First paragraph of the letter body.  It should be long enough that it
 causes a line wrap, because otherwise how will we see the hanging
