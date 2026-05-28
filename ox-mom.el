@@ -131,9 +131,9 @@
   :type 'string)
 
 (defcustom org-mom-pdf-process
-  '("pdfmom -t -K utf-8 %f > %b.pdf"
-    "pdfmom -t -K utf-8 %f > %b.pdf"
-    "pdfmom -t -K utf-8 %f > %b.pdf")
+  '("pdfmom -p -t -e -K utf-8 %f > %b.pdf"
+    "pdfmom -p -t -e -K utf-8 %f > %b.pdf"
+    "pdfmom -p -t -e -K utf-8 %f > %b.pdf")
   "Commands to process a MOM file to a PDF file.
 %f is replaced by the full file name, %b by the file base name
 \(without extension), and %o by the base directory of the file.
@@ -144,12 +144,12 @@
 	  (repeat :tag "Shell command sequence"
 		  (string :tag "Shell command"))
 	  (const :tag "2 runs of pdfmom"
-                 ("pdfmom -t -K utf-8 %f > %b.pdf"
-                  "pdfmom -t -K utf-8 %f > %b.pdf"))
+                 ("pdfmom -p -t -e -K utf-8 %f > %b.pdf"
+                  "pdfmom -p -t -e -K utf-8 %f > %b.pdf"))
           (const :tag "3 runs of pdfmom"
-                 ("pdfmom -t -K utf-8 %f > %b.pdf"
-                  "pdfmom -t -K utf-8 %f > %b.pdf"
-                  "pdfmom -t -K utf-8 %f > %b.pdf"))
+                 ("pdfmom -p -t -e -K utf-8 %f > %b.pdf"
+                  "pdfmom -p -t -e -K utf-8 %f > %b.pdf"
+                  "pdfmom -p -t -e -K utf-8 %f > %b.pdf"))
 	  (function)))
 
 (defcustom org-mom-logfiles-extensions

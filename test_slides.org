@@ -38,3 +38,14 @@ Lets test a Table.
 | Lisp     | 1958 | Functional |
 | C        | 1972 | Imperative |
 | Haskell  | 1990 | Functional |
+
+* Lets try embedding PIC
+
+#+begin_export mom
+  .PS
+  down;
+  box "Emacs"
+  arrow
+  box "Org Mode"
+  .PE
+#+end_export
