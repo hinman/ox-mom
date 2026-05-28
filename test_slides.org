@@ -1,0 +1,40 @@
+#+AUTHOR: Lee Hinman
+#+DATE: May 27, 2026
+#+TITLE: Test Document for Slides
+#+OPTIONS: title
+#+MOM_DOCTYPE: SLIDES
+
+* Slide 1
+Code examples had better work
+
+#+begin_src shell
+  cd ~
+  ls -al
+#+end_src
+
+* Slide 2
+- And lists
+- Can't survive with out lists
+- And it must have 3 bullets
+
+* Slide 3
+1. A mixed list
+   - Bullet 1
+   - Bullet 2
+2. Back to numbered
+
+* Slide 4
+
+1. Just a numbered list
+2. The second item
+3. Third item
+     
+
+* Slide 5
+Lets test a Table.
+
+| Language | Year | Paradigm   |
+|----------+------+------------|
+| Lisp     | 1958 | Functional |
+| C        | 1972 | Imperative |
+| Haskell  | 1990 | Functional |

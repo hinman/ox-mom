@@ -21,6 +21,14 @@
 * Check List
 - [ ] Not Done
 - [X] Done
+* Mixed List
+1. First Numbered
+   - Bullet one
+   - Bullet two
+   - Bullet three
+2. Second Numbered
+   - Bullet 2.1
+   - Bullet 2.2
 * Special Symbols
 Pro tip: Given a circle \Gamma of diameter d, the length of its
 circumference is \pi{}d.

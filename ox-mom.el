@@ -284,6 +284,8 @@ holding export options."
 	(format ".PRINTSTYLE TYPESET\n")))
      (let ((preamble (plist-get info :mom-preamble)))
        (when preamble (format "%s\n" preamble)))
+     (when (and slides-p title)
+       (format ".COVERTITLE \"%s\"\n.COVER COVERTITLE\n" title))
      ".START\n"
      (when letter-date    (format ".DATE\n%s\n" letter-date))
      (when letter-to      (format ".TO\n%s\n" letter-to))
@@ -504,6 +506,9 @@ contextual information."
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((type (org-element-property :type plain-list))
+         (slides-p (string= (upcase (or (plist-get info :mom-doctype)
+                                        org-mom-doctype))
+                            "SLIDES"))
          (mom-type
           (cond
            ((eq type 'ordered)   ".LIST DIGIT")
@@ -523,7 +528,9 @@ contextual information."
               (format ".LIST VARIABLE \"%s\"" widest))))))
     (org-mom--wrap-label
      plain-list
-     (format "%s\n%s\n.LIST OFF\n" mom-type contents))))
+     (format "%s%s\n%s\n.LIST OFF\n"
+             (if slides-p ".QUAD LEFT\n" "")
+             mom-type contents))))
 
 ;;; Plain Text
 (defun org-mom-plain-text (text info)
