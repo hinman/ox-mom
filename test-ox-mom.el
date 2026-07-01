@@ -1,4 +1,4 @@
-;;; test-ox-mom.el --- ERT tests for ox-mom.el
+;;; test-ox-mom.el --- ERT tests for ox-mom.el  -*- lexical-binding: t; -*-
 
 (require 'ert)
 (require 'ox-mom)
@@ -147,7 +147,7 @@
 (ert-deftest ox-mom-eqn-pic-exports-hook-registered ()
   "`org-mom--override-eqn-pic-exports' is registered on the processing hook."
   (should (memq 'org-mom--override-eqn-pic-exports
-                org-export-before-processing-hook)))
+                org-export-before-processing-functions)))
 
 (ert-deftest ox-mom-eqn-pic-exports-overrides-eqn ()
   "Hook sets buffer-local :exports for eqn to `org-mom-eqn-pic-exports'."
@@ -698,7 +698,7 @@
 (ert-deftest ox-mom-var-format-headline-function ()
   "org-mom-format-headline-function replaces the default headline formatter."
   (let* ((org-mom-format-headline-function
-          (lambda (todo type priority text tags) (upcase text)))
+          (lambda (_todo _type _priority text _tags) (upcase text)))
          (output (mom-export "* hello\n")))
     (should (string-match "\\.HEADING 1 \"HELLO\"" output))))
 

@@ -2,3 +2,4 @@
 examples/*.mom
 examples/*.pdf
 
+*.elc
