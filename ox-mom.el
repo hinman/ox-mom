@@ -1,4 +1,4 @@
-;;; ox-mom.el --- Groff MOM Macro Back-End for Org Export Engine
+;;; ox-mom.el --- Groff MOM Macro Back-End for Org Export Engine  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2026, Lee Hinman
 ;; All rights reserved.
@@ -28,7 +28,7 @@
 ;; Author: Lee Hinman <hinman@gmail.com>
 ;; Assisted-by: Claude:claude-sonnet-4-6
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "27.1") (org "9.5"))
+;; Package-Requires: ((emacs "27.1") (org "9.6"))
 ;; Keywords: org, groff, mom, wp, outlines
 ;; URL: https://github.com/hinman/ox-mom
 
@@ -386,14 +386,14 @@ holding export options."
 
 ;;; Bold
 
-(defun org-mom-bold (bold contents info)
+(defun org-mom-bold (_bold contents _info)
   "Transcode BOLD from Org to MOM.
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
   (format "\\f[B]%s\\f[P]" contents))
 
 ;;; Center block
-(defun org-mom-center-block (center-block contents info)
+(defun org-mom-center-block (center-block contents _info)
   "Transcode a CENTER-BLOCK element from Org to MOM.
 CONTENTS holds the contents of the center block.  INFO is a plist
 holding contextual information."
@@ -402,7 +402,7 @@ holding contextual information."
    (format ".CENTER_BLOCK\n%s\n.CENTER_BLOCK OFF" contents)))
 
 ;;; Clock
-(defun org-mom-clock (clock contents info)
+(defun org-mom-clock (clock _contents _info)
   "Transcode a CLOCK element from Org to MOM.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -553,7 +553,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
               (org-mom-plain-text code info)))))
 
 ;;; italic
-(defun org-mom-italic (italic contents info)
+(defun org-mom-italic (_italic contents _info)
   "Transcode ITALIC from Org to MOM.
 CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
@@ -650,7 +650,7 @@ contextual information."
       (concat ".PP\n" contents))))
 
 ;;; Planning
-(defun org-mom-planning (planning _contents info)
+(defun org-mom-planning (planning _contents _info)
   "Transcode a PLANNING element from Org to MOM.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
@@ -680,14 +680,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
    "\n"))
 
 ;;; Quote
-(defun org-mom-quote-block (quote-block contents info)
+(defun org-mom-quote-block (_quote-block contents _info)
   "Transcode a QUOTE-BLOCK element from Org to MOM.
 CONTENTS holds the quoted text.  INFO is a plist holding
 contextual information."
   (format ".BLOCKQUOTE\n%s\n.BLOCKQUOTE OFF" contents))
 
 ;;; Section
-(defun org-mom-section (section contents info)
+(defun org-mom-section (_section contents _info)
   "Transcode a SECTION element from Org to MOM.
 CONTENTS holds the contents of the section.  INFO is a plist holding
 contextual information."
@@ -724,14 +724,14 @@ them via Babel."
                   (org-export-format-code-default src-block info))))))))
 
 ;;; strike-through
-(defun org-mom-strike-through (strike-through contents info)
+(defun org-mom-strike-through (_strike-through contents _info)
   "Transcode STRIKE-THROUGH from Org to MOM.
 CONTENTS is the text with strikethrough markup.  INFO is a plist
 holding contextual information."
   (format "\n.UNDERSCORE -0.3m \"%s\"\n" contents))
 
 ;;; subscript
-(defun org-mom-subscript (subscript contents info)
+(defun org-mom-subscript (_subscript contents _info)
   "Transcode a SUBSCRIPT object from Org to MOM.
 CONTENTS is the text to be lowered.  INFO is a plist holding
 contextual information.
@@ -740,14 +740,14 @@ MOM lacks a dedicated subscript macro, so this uses
   (format "\n.SUPERSCRIPT_RAISE_AMOUNT -0.3m\n\\*[SUP]%s\\*[SUPX]\n.SUPERSCRIPT_RAISE_AMOUNT 0.3m\n" contents))
 
 ;;; superscript
-(defun org-mom-superscript (superscript contents info)
+(defun org-mom-superscript (_superscript contents _info)
   "Transcode a SUPERSCRIPT object from Org to MOM.
 CONTENTS is the text to be raised.  INFO is a plist holding
 contextual information."
   (format "\\*[SUP]%s\\*[SUPX]" contents))
 
 ;;; timestamp
-(defun org-mom-timestamp (timestamp contents info)
+(defun org-mom-timestamp (timestamp _contents info)
   "Transcode a TIMESTAMP object from Org to Mom.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -761,7 +761,7 @@ information."
       (t (format org-mom-diary-timestamp-format value)))))
 
 ;;; Underline
-(defun org-mom-underline (underline contents info)
+(defun org-mom-underline (_underline contents _info)
   "Transcode UNDERLINE from Org to MOM.
 CONTENTS is the text to underline.  INFO is a plist holding
 contextual information."
@@ -775,7 +775,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (org-element-property :value verbatim)))
   
 ;;; Verse
-(defun org-mom-verse-block (verse-block contents info)
+(defun org-mom-verse-block (_verse-block contents _info)
   "Transcode a VERSE-BLOCK element from Org to MOM.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
@@ -893,7 +893,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;; Link
 
-(defun org-mom-link--inline-image (link info)
+(defun org-mom-link--inline-image (link _info)
   "Return MOM markup for an inline image LINK.
 INFO is a plist used as a communication channel."
   (let* ((path (let ((raw (org-element-property :path link)))
@@ -970,7 +970,7 @@ contextual information."
        (format ".CODE\n%s\n.CODE OFF\n" contents)))
 
 ;;; Radio Target
-(defun org-mom-radio-target (radio-target text info)
+(defun org-mom-radio-target (_radio-target text _info)
   "Transcode a RADIO-TARGET object from Org to MOM.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
@@ -1225,7 +1225,7 @@ unaffected."
              (cons (cons :exports org-mom-eqn-pic-exports)
                    (assq-delete-all :exports (symbol-value args-sym))))))))
 
-(add-hook 'org-export-before-processing-hook
+(add-hook 'org-export-before-processing-functions
           #'org-mom--override-eqn-pic-exports)
 
 (provide 'ox-mom)

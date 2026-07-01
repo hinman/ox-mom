@@ -1,0 +1,216 @@
+#+TITLE: ox-mom — Groff MOM Export Backend for Org Mode
+
+An Org Mode export backend that produces [[https://www.gnu.org/software/groff/manual/groff.html#mom][Groff MOM macro]] documents
+from =.org= files.  MOM is a high-level macro set bundled with GNU
+Groff that targets print-quality typesetting.  Exported files are
+processed with =pdfmom= to produce PDF output.
+
+* Requirements
+
+- GNU Emacs 27.1 or later
+- Org Mode 9.6 or later
+- [[https://www.gnu.org/software/groff/][GNU Groff]] 1.22.4 or later (provides =pdfmom=)
+
+Optionally:
+
+- [[https://www.gnu.org/software/src-highlite/][GNU source-highlight]] — enables syntax-colored source blocks in PDF output
+
+On macOS, both can be installed via Homebrew:
+
+#+begin_src sh
+brew install groff source-highlight
+#+end_src
+
+On Debian/Ubuntu:
+
+#+begin_src sh
+apt install groff source-highlight
+#+end_src
+
+* Installation
+
+** Manual
+
+Clone the repository and add it to your load path:
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "/path/to/ox-mom")
+(require 'ox-mom)
+#+end_src
+
+** use-package with straight.el
+
+#+begin_src emacs-lisp
+(use-package ox-mom
+  :straight (:host github :repo "hinman/ox-mom"))
+#+end_src
+
+* Usage
+
+** Exporting
+
+With point in an Org buffer, invoke the Org export dispatcher (=C-c C-e=)
+and press =m= to reach the MOM submenu:
+
+| Key  | Action                          |
+|------+---------------------------------|
+| =m b= | Export to a MOM buffer          |
+| =m f= | Export to a =.mom= file           |
+| =m p= | Export to PDF via =pdfmom=        |
+| =m o= | Export to PDF and open the file |
+
+You can also call the export functions directly:
+
+#+begin_src emacs-lisp
+(org-mom-export-to-pdf)
+#+end_src
+
+** Document keywords
+
+Place these in your =.org= file's preamble to control export behaviour.
+
+| Keyword          | Description                                 | Default   |
+|------------------+---------------------------------------------+-----------|
+| =#+TITLE=          | Document title                              |           |
+| =#+AUTHOR=         | Author name                                 |           |
+| =#+DATE=           | Document date                               |           |
+| =#+MOM_DOCTYPE=    | Document type (see below)                   | =DEFAULT=   |
+| =#+MOM_PREAMBLE=   | Raw MOM macros inserted before =.START=       |           |
+
+** Document types
+
+Set =#+MOM_DOCTYPE= to one of the following values.
+
+*** DEFAULT / CHAPTER
+
+Standard typeset document.  Paper size, font family, and point size
+are controlled by the customisation variables =org-mom-paper=,
+=org-mom-font-family=, and =org-mom-pt-size=.
+
+*** LETTER
+
+Produces a formatted business letter.  Additional keywords:
+
+| Keyword                | Description                         |
+|------------------------+-------------------------------------|
+| =#+MOM_LETTER_TO=        | Recipient name and address (multiline) |
+| =#+MOM_LETTER_FROM=      | Sender name and address (multiline)    |
+| =#+MOM_LETTER_CC=        | Carbon-copy recipient                  |
+| =#+MOM_LETTER_SUBJECT=   | Subject line                           |
+| =#+MOM_LETTER_GREETING=  | Opening salutation                     |
+| =#+MOM_LETTER_CLOSING=   | Closing phrase                         |
+
+Example:
+
+#+begin_src org
+,#+MOM_DOCTYPE: LETTER
+,#+MOM_LETTER_TO: Jane Smith
+,#+MOM_LETTER_TO: 456 Oak Avenue
+,#+MOM_LETTER_FROM: Lee Hinman
+,#+MOM_LETTER_GREETING: Dear Ms. Smith,
+,#+MOM_LETTER_CLOSING: Sincerely,
+#+end_src
+
+*** SLIDES
+
+Produces a PDF slide deck.  Each top-level headline becomes a new
+slide.  Additional keywords:
+
+| Keyword                  | Description                              | Default  |
+|--------------------------+------------------------------------------+----------|
+| =#+MOM_SLIDES_ASPECT=      | Aspect ratio passed to =.DOCTYPE SLIDES=   | =16:9=     |
+| =#+MOM_SLIDES_HEADER=      | Slide header string                      |          |
+| =#+MOM_SLIDES_FOOTER=      | Slide footer string                      |          |
+| =#+MOM_SLIDES_TRANSITION=  | PDF page transition effect               |          |
+| =#+MOM_SLIDES_PAUSE=       | PDF pause effect between slides          |          |
+
+** Source blocks
+
+Source blocks are syntax-highlighted in the exported PDF when
+=org-mom-source-highlight= is non-nil (the default) and GNU
+source-highlight is available.  The languages supported are listed in
+=org-mom-source-highlight-langs=.
+
+*** eqn and pic blocks
+
+Source blocks whose language is =eqn= or =pic= are passed directly to the
+corresponding Groff preprocessors rather than rendered as code
+listings.  =pdfmom= is invoked with =-e= (eqn) and =-p= (pic) flags to
+enable them.
+
+#+begin_src org
+,#+begin_src eqn
+x = {-b +- sqrt{b sup 2 - 4ac}} over {2a}
+,#+end_src
+
+,#+begin_src pic
+box "Emacs"; arrow; box "Org Mode"
+,#+end_src
+#+end_src
+
+** Raw MOM output
+
+Use an export block or the =MOM= keyword to pass raw Groff/MOM markup
+through to the output unchanged:
+
+#+begin_src org
+,#+begin_export mom
+.CENTER
+This line is centred by a raw MOM macro.
+,#+end_export
+#+end_src
+
+#+begin_src org
+,#+MOM: .SP 2
+#+end_src
+
+Inline MOM snippets work too with the =@@mom:…@@= syntax:
+
+#+begin_src org
+This word is @@mom:\f[B]@@bold@@mom:\f[P]@@ by raw escape.
+#+end_src
+
+** Images
+
+Inline images are exported using MOM's =.PDF_IMAGE= macro.  The
+=:width= and =:height= attributes are forwarded:
+
+#+begin_src org
+,#+ATTR_MOM: :width 3i :height 2i
+[[file:diagram.pdf]]
+#+end_src
+
+Supported formats: =jpg=, =png=, =pdf=, =ps=, =eps=, =pic=.
+
+** Tables
+
+Tables are rendered using the Groff =tbl= preprocessor.  The =:divider=
+attribute adds vertical rules; =:center= centres the table;
+=:title-line= makes the first row bold:
+
+#+begin_src org
+,#+ATTR_MOM: :divider t :title-line t
+| Language | Year | Paradigm   |
+|----------+------+------------|
+| Lisp     | 1958 | Functional |
+| C        | 1972 | Imperative |
+#+end_src
+
+* Customisation
+
+| Variable                          | Description                                      | Default                          |
+|-----------------------------------+--------------------------------------------------+----------------------------------|
+| =org-mom-paper=                     | Paper size (=.PAPER= macro)                        | ="LETTER"=                         |
+| =org-mom-font-family=               | Font family (=.FAMILY= macro)                      | ="T"= (Times)                      |
+| =org-mom-pt-size=                   | Point size (=.PT_SIZE= macro)                      | =12=                               |
+| =org-mom-doctype=                   | Default document type (=.DOCTYPE= macro)           | ="DEFAULT"=                        |
+| =org-mom-pdf-process=               | Shell commands used to compile =.mom= to PDF       | Three runs of =pdfmom -p -t -e -K utf-8= |
+| =org-mom-source-highlight=          | Enable GNU source-highlight for source blocks    | =t=                                |
+| =org-mom-source-highlight-langs=    | Mapping of Org language names to source-highlight names | see variable docstring  |
+| =org-mom-eqn-pic-exports=           | Default =:exports= value for =eqn= and =pic= blocks    | ="code"=                           |
+| =org-mom-tables-centered=           | Centre tables by default                         | =t=                                |
+| =org-mom-inline-image-rules=        | File extensions recognised as inline images      | see variable docstring           |
+| =org-mom-format-headline-function=  | Custom function for formatting headline text     | =nil=                              |
+| =org-mom-format-drawer-function=    | Custom function for formatting drawers           | =nil=                              |
+
+All variables belong to the =ox-mom= customisation group (=M-x customize-group RET ox-mom RET=).
